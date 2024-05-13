@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package contactsproto;
+
+service Contacts {
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+
+  rpc GetContacts (Void) returns (ContactsResponse) {}
+  rpc GetContact (Id) returns (Contact) {}
+  rpc CreateContact (CreateContactRequest) returns (Contact) {}
+  rpc DeleteContact (Id) returns (Void) {}
+}
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloReply {
+  string message = 1;
+}
+
+message Void {}
+
+message Id {
+  string id = 1;
+}
+
+message ContactsResponse {
+  repeated Contact contacts = 1;
+}
+
+message Contact {
+  string id = 1;
+  string fullName = 2;
+  string email = 3;
+  string avatar = 4;
+}
+
+message CreateContactRequest {
+  string fullName = 2;
+  string email = 3;
+  string avatar = 4;
+}
