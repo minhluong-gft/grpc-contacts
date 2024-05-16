@@ -44,9 +44,17 @@ function createContact(call, callback) {
     fullName,
     email,
     avatar,
+    isFavorite: false,
   };
   contacts.push(newContact);
   callback(null, newContact);
+}
+
+function setContactFavorite(call, callback) {
+  const { id, isFavorite } = call.request;
+  const contact = contacts.find((c) => c.id === id);
+  contact.isFavorite = isFavorite;
+  callback(null, contact);
 }
 
 function main() {
@@ -57,6 +65,7 @@ function main() {
     getContact: getContact,
     deleteContact,
     createContact,
+    setContactFavorite,
   });
 
   const port = 50051;

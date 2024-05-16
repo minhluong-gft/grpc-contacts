@@ -9,6 +9,7 @@ service Contacts {
   rpc GetContact (Id) returns (Contact) {}
   rpc CreateContact (CreateContactRequest) returns (Contact) {}
   rpc DeleteContact (Id) returns (Void) {}
+  rpc setContactFavorite (SetContactFavoriteRequest) returns (Contact) {}
 }
 
 message HelloRequest {
@@ -34,10 +35,16 @@ message Contact {
   string fullName = 2;
   string email = 3;
   string avatar = 4;
+  bool isFavorite = 5;
 }
 
 message CreateContactRequest {
   string fullName = 2;
   string email = 3;
   string avatar = 4;
+}
+
+message SetContactFavoriteRequest {
+  string id = 1;
+  bool isFavorite = 2;
 }
