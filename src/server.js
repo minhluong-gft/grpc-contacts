@@ -20,17 +20,59 @@ function sayHello(call, callback) {
   callback(null, { message: "Hello guys" + call.request.name });
 }
 
+function checkIsAuthenticated(call, callback) {
+  try {
+    const [authorization] = call.metadata.get("authorization");
+    const credentials = authorization.split(" ")[1];
+    const [username, password] = Buffer.from(credentials, "base64")
+      .toString()
+      .split(":");
+    if (username === "user" && password === "123") {
+      return true;
+    }
+    throw new Error("Invalid authorization");
+  } catch (e) {
+    callback({
+      code: grpc.status.UNAUTHENTICATED,
+      message: "Invalid authorization",
+    });
+    return false;
+  }
+}
+
+function login(call, callback) {
+  const { username, password } = call.request;
+  if (username === "user" && password === "123") {
+    const credentials = btoa(username + ":" + password);
+    callback(null, { credentials });
+  } else {
+    callback({
+      code: grpc.status.UNAUTHENTICATED,
+      message: "Invalid username or password",
+    });
+  }
+}
+
 function getContacts(call, callback) {
+  if (!checkIsAuthenticated(call, callback)) {
+    return;
+  }
   callback(null, { contacts });
 }
 
 function getContact(call, callback) {
+  if (!checkIsAuthenticated(call, callback)) {
+    return;
+  }
   const contactId = call.request.id;
   const contact = contacts.find((c) => c.id === contactId);
   callback(null, contact);
 }
 
 function deleteContact(call, callback) {
+  if (!checkIsAuthenticated(call, callback)) {
+    return;
+  }
   const contactId = call.request.id;
   const index = contacts.findIndex((c) => c.id === contactId);
   contacts.splice(index, 1);
@@ -38,6 +80,9 @@ function deleteContact(call, callback) {
 }
 
 function createContact(call, callback) {
+  if (!checkIsAuthenticated(call, callback)) {
+    return;
+  }
   const { fullName, email, avatar } = call.request;
   const newContact = {
     id: Date.now().toString(),
@@ -51,6 +96,9 @@ function createContact(call, callback) {
 }
 
 function setContactFavorite(call, callback) {
+  if (!checkIsAuthenticated(call, callback)) {
+    return;
+  }
   const { id, isFavorite } = call.request;
   const contact = contacts.find((c) => c.id === id);
   contact.isFavorite = isFavorite;
@@ -66,6 +114,7 @@ function main() {
     deleteContact,
     createContact,
     setContactFavorite,
+    login,
   });
 
   const port = 50051;
